@@ -605,7 +605,7 @@ export default class SignaturePad extends SignatureEventTarget {
       options.velocityFilterWeight * endPoint.velocityFrom(startPoint) +
       (1 - options.velocityFilterWeight) * this._lastVelocity;
 
-    const newWidth = this._strokeWidth(velocity, endPoint.pressure, options);
+    const newWidth = this._strokeWidth(velocity, options);
 
     const widths = {
       end: newWidth,
@@ -618,15 +618,8 @@ export default class SignaturePad extends SignatureEventTarget {
     return widths;
   }
 
-  private _strokeWidth(
-    velocity: number,
-    pressure: number,
-    options: PointGroupOptions,
-  ): number {
-    return Math.max(
-      (options.maxWidth / (velocity + 1)) * pressure,
-      options.minWidth,
-    );
+  private _strokeWidth(velocity: number, options: PointGroupOptions): number {
+    return Math.max(options.maxWidth / (velocity + 1), options.minWidth);
   }
 
   private _drawCurveSegment(x: number, y: number, width: number): void {
