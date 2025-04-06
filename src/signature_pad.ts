@@ -38,6 +38,7 @@ export interface PointGroupOptions {
   maxWidth: number;
   penColor: string;
   velocityFilterWeight: number;
+  isFudePenStyle: boolean;
   /**
    * This is the globalCompositeOperation for the line.
    * *default: 'source-over'*
@@ -65,6 +66,7 @@ export default class SignaturePad extends SignatureEventTarget {
   public penColor: string;
   public minDistance: number;
   public velocityFilterWeight: number;
+  public isFudePenStyle: boolean;
   public compositeOperation: GlobalCompositeOperation;
   public backgroundColor: string;
   public throttle: number;
@@ -90,6 +92,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
+    this.isFudePenStyle = options.isFudePenStyle || false;
 
     // We need to handle 0 value, so use `??` instead of `||`
     this.throttle = options.throttle ?? 16; // in milliseconds
@@ -420,6 +423,10 @@ export default class SignaturePad extends SignatureEventTarget {
         group && 'velocityFilterWeight' in group
           ? group.velocityFilterWeight
           : this.velocityFilterWeight,
+      isFudePenStyle:
+        group && 'isFudePenStyle' in group
+          ? group.isFudePenStyle
+          : this.isFudePenStyle,
       compositeOperation:
         group && 'compositeOperation' in group
           ? group.compositeOperation
@@ -550,7 +557,9 @@ export default class SignaturePad extends SignatureEventTarget {
   private _reset(options: PointGroupOptions): void {
     this._lastPoints = [];
     this._lastVelocity = 0;
-    this._lastWidth = options.maxWidth;
+    this._lastWidth = options.isFudePenStyle
+      ? options.maxWidth
+      : (options.minWidth + options.maxWidth) / 2;
     this._ctx.fillStyle = options.penColor;
     this._ctx.globalCompositeOperation = options.compositeOperation;
   }
@@ -625,9 +634,14 @@ export default class SignaturePad extends SignatureEventTarget {
   private _drawCurveSegment(x: number, y: number, width: number): void {
     const ctx = this._ctx;
 
-    ctx.moveTo(x - width, y - width);
-    ctx.lineTo(x + width * 1.4, y + width * 0.1);
-    ctx.arc(x + width, y + width, width, -Math.PI / 2, Math.PI * 0.8, false);
+    if (this.isFudePenStyle) {
+      ctx.moveTo(x - width, y - width);
+      ctx.lineTo(x + width * 1.4, y + width * 0.1);
+      ctx.arc(x + width, y + width, width, -Math.PI / 2, Math.PI * 0.8, false);
+    } else {
+      ctx.moveTo(x, y);
+      ctx.arc(x, y, width, 0, 2 * Math.PI, false);
+    }
     this._isEmpty = false;
   }
 
