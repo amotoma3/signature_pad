@@ -550,7 +550,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _reset(options: PointGroupOptions): void {
     this._lastPoints = [];
     this._lastVelocity = 0;
-    this._lastWidth = (options.minWidth + options.maxWidth) / 2;
+    this._lastWidth = options.maxWidth;
     this._ctx.fillStyle = options.penColor;
     this._ctx.globalCompositeOperation = options.compositeOperation;
   }

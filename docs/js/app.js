@@ -20,7 +20,7 @@ const signaturePad = new SignaturePad(canvas, {
 
   // additional options
   minWidth: 0.1,
-  maxWidth: 12,
+  maxWidth: 8,
 });
 
 function randomColor() {
